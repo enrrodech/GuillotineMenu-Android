@@ -120,6 +120,7 @@ public class GuillotineAnimation {
             @Override
             public void onAnimationStart(Animator animation) {
                 mGuillotineView.setVisibility(View.VISIBLE);
+                mActionBarView.setVisibility(View.INVISIBLE);
                 isOpening = true;
             }
 
@@ -157,6 +158,7 @@ public class GuillotineAnimation {
             @Override
             public void onAnimationEnd(Animator animation) {
                 isClosing = false;
+                mActionBarView.setVisibility(View.VISIBLE);
                 mGuillotineView.setVisibility(View.GONE);
                 startActionBarAnimation();
 
