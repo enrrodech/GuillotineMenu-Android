@@ -35,6 +35,7 @@ public class GuillotineAnimation {
 
     private boolean isOpening;
     private boolean isClosing;
+    private boolean isClosed;
 
     private TextView titleTextView;
 
@@ -51,6 +52,7 @@ public class GuillotineAnimation {
         this.mOpeningAnimation = buildOpeningAnimation();
         this.mClosingAnimation = buildClosingAnimation();
         if (builder.isClosedOnStart) {
+            isClosed = true;
             mGuillotineView.setRotation(GUILLOTINE_CLOSED_ANGLE);
             mGuillotineView.setVisibility(View.INVISIBLE);
         }
@@ -73,6 +75,10 @@ public class GuillotineAnimation {
             mClosingAnimation.start();
         }
 
+    }
+
+    public boolean isClosed() {
+        return isClosed;
     }
 
     private void setUpOpeningView(final View openingView) {
@@ -138,6 +144,7 @@ public class GuillotineAnimation {
                 if (mListener != null) {
                     mListener.onGuillotineOpened();
                 }
+                isClosed = false;
             }
 
             @Override
@@ -175,6 +182,7 @@ public class GuillotineAnimation {
                 if (mListener != null) {
                     mListener.onGuillotineClosed();
                 }
+                isClosed = true;
             }
 
             @Override
