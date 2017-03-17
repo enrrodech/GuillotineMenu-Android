@@ -6,6 +6,8 @@ import android.animation.TimeInterpolator;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.yalantis.guillotine.interfaces.GuillotineListener;
 import com.yalantis.guillotine.util.ActionBarInterpolator;
@@ -34,6 +36,8 @@ public class GuillotineAnimation {
     private boolean isOpening;
     private boolean isClosing;
 
+    private TextView titleTextView;
+
     private GuillotineAnimation(GuillotineBuilder builder) {
         this.mActionBarView = builder.actionBarView;
         this.mListener = builder.guillotineListener;
@@ -56,12 +60,16 @@ public class GuillotineAnimation {
 
     public void open() {
         if (!isOpening) {
+            addTitleActionBarToGuillotineView();
             mOpeningAnimation.start();
         }
     }
 
     public void close() {
         if (!isClosing) {
+            if (titleTextView != null) {
+                titleTextView.animate().setDuration(mDelay).alpha(1).start();
+            }
             mClosingAnimation.start();
         }
 
@@ -159,7 +167,9 @@ public class GuillotineAnimation {
             public void onAnimationEnd(Animator animation) {
                 isClosing = false;
                 mActionBarView.setVisibility(View.VISIBLE);
+                mActionBarView.setAlpha(1);
                 mGuillotineView.setVisibility(View.GONE);
+                removeTitleActionBarFromGuillotineView();
                 startActionBarAnimation();
 
                 if (mListener != null) {
@@ -188,8 +198,53 @@ public class GuillotineAnimation {
     }
 
     private ObjectAnimator initAnimator(ObjectAnimator animator) {
-        animator.setStartDelay(mDelay);
+        //animator.setStartDelay(mDelay);
         return animator;
+    }
+
+    private void addTitleActionBarToGuillotineView() {
+        if (mActionBarView instanceof android.support.v7.widget.Toolbar) {
+            android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) mActionBarView;
+            float leftMargin = 0;
+            for (int i = 0; i < toolbar.getChildCount(); i++) {
+                View v = toolbar.getChildAt(i);
+                if (v instanceof TextView) {
+                    titleTextView = (TextView) v;
+
+                    leftMargin += titleTextView.getX();
+                    float yPosition = titleTextView.getY();
+                    float marginBottom = ((titleTextView.getWidth() - titleTextView.getHeight()) / 2) - yPosition ;
+                    ((android.support.v7.widget.Toolbar) mActionBarView).removeView(titleTextView);
+
+                    ((RelativeLayout) mGuillotineView).addView(titleTextView, 0);
+
+                    titleTextView.setTranslationX(-marginBottom);
+                    titleTextView.setTranslationY(leftMargin - 20);
+                    titleTextView.setRotation(90);
+                }
+                leftMargin += v.getWidth();
+            }
+        }
+        if (titleTextView != null) {
+            titleTextView.animate().setDuration(mDelay).alpha(0).start();
+        }
+    }
+
+    private void removeTitleActionBarFromGuillotineView() {
+        if (titleTextView != null) {
+            titleTextView.setRotation(0);
+            float yPosition = titleTextView.getTranslationY() - titleTextView.getHeight();
+            ((RelativeLayout) mGuillotineView).removeView(titleTextView);
+
+            float leftMargin = 0;
+            for (int j = 0; j < ((android.support.v7.widget.Toolbar) mActionBarView).getChildCount(); j++) {
+                View v2 = ((android.support.v7.widget.Toolbar) mActionBarView).getChildAt(j);
+                leftMargin += v2.getWidth();
+            }
+            ((android.support.v7.widget.Toolbar) mActionBarView).addView(titleTextView);
+            titleTextView.setX(yPosition - leftMargin - (titleTextView.getHeight()/2) + 2);
+            titleTextView.setTranslationY(0);
+        }
     }
 
     private float calculatePivotY(View burger) {
