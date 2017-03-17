@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.os.Build;
+import android.support.v7.widget.AppCompatTextView;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -260,7 +261,7 @@ public class GuillotineAnimation {
             float leftMargin = 0;
             for (int i = 0; i < toolbar.getChildCount(); i++) {
                 View v = toolbar.getChildAt(i);
-                if (v instanceof TextView) {
+                if (v instanceof TextView || v instanceof AppCompatTextView) {
                     titleTextView = (TextView) v;
 
                     leftMargin += titleTextView.getX();
