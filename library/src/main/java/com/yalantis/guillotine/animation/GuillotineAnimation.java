@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.os.Build;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
@@ -22,6 +23,7 @@ public class GuillotineAnimation {
     private static final float GUILLOTINE_OPENED_ANGLE = 0f;
     private static final int DEFAULT_DURATION = 625;
     private static final float ACTION_BAR_ROTATION_ANGLE = 3f;
+    private static final int MIN_GESTURE_DISTANCE = 50;
 
     private final View mGuillotineView;
     private final long mDuration;
@@ -58,6 +60,49 @@ public class GuillotineAnimation {
         }
         //TODO handle right-to-left layouts
         //TODO handle landscape orientation
+
+        //  Add events for gestures
+        this.mActionBarView.setOnTouchListener(new View.OnTouchListener() {
+            private float y1,y2;
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch(motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        y1 = motionEvent.getY();
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        y2 = motionEvent.getY();
+                        float deltaX = y1 - y2;
+                        if (Math.abs(deltaX) > MIN_GESTURE_DISTANCE) {
+                            open();
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
+
+        this.mGuillotineView.setOnTouchListener(new View.OnTouchListener() {
+            private float x1,x2;
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch(motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        x1 = motionEvent.getX();
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        if (x1 < 40) {
+                            x2 = motionEvent.getX();
+                            float deltaX = x2 - x1;
+                            if (Math.abs(deltaX) > MIN_GESTURE_DISTANCE) {
+                                close();
+                            }
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
     }
 
     public void open() {
@@ -74,7 +119,6 @@ public class GuillotineAnimation {
             }
             mClosingAnimation.start();
         }
-
     }
 
     public boolean isClosed() {
