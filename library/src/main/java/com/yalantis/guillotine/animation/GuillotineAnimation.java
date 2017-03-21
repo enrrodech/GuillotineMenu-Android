@@ -3,8 +3,10 @@ package com.yalantis.guillotine.animation;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.content.res.Resources;
 import android.os.Build;
 import android.support.v7.widget.AppCompatTextView;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -258,24 +260,25 @@ public class GuillotineAnimation {
     private void addTitleActionBarToGuillotineView() {
         if (mActionBarView instanceof android.support.v7.widget.Toolbar) {
             android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) mActionBarView;
-            float leftMargin = 0;
             for (int i = 0; i < toolbar.getChildCount(); i++) {
                 View v = toolbar.getChildAt(i);
                 if (v instanceof TextView || v instanceof AppCompatTextView) {
                     titleTextView = (TextView) v;
-
-                    leftMargin += titleTextView.getX();
                     float yPosition = titleTextView.getY();
                     float marginBottom = ((titleTextView.getWidth() - titleTextView.getHeight()) / 2) - yPosition ;
-                    ((android.support.v7.widget.Toolbar) mActionBarView).removeView(titleTextView);
 
-                    ((RelativeLayout) mGuillotineView).addView(titleTextView, 0);
+                    ((android.support.v7.widget.Toolbar) mActionBarView).removeView(titleTextView);
+                    ((RelativeLayout) mGuillotineView).addView(titleTextView);
+
+                    DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+                    int width = metrics.widthPixels;
+                    int center = width/2;
+                    int position = center - this.titleTextView.getWidth()/2;
 
                     titleTextView.setTranslationX(-marginBottom);
-                    titleTextView.setTranslationY(leftMargin - 20);
+                    titleTextView.setY(position + (this.titleTextView.getWidth() - this.titleTextView.getHeight())/2);
                     titleTextView.setRotation(90);
                 }
-                leftMargin += v.getWidth();
             }
         }
         if (titleTextView != null) {
@@ -286,7 +289,6 @@ public class GuillotineAnimation {
     private void removeTitleActionBarFromGuillotineView() {
         if (titleTextView != null) {
             titleTextView.setRotation(0);
-            float yPosition = titleTextView.getTranslationY() - titleTextView.getHeight();
             ((RelativeLayout) mGuillotineView).removeView(titleTextView);
 
             float leftMargin = 0;
@@ -295,7 +297,12 @@ public class GuillotineAnimation {
                 leftMargin += v2.getWidth();
             }
             ((android.support.v7.widget.Toolbar) mActionBarView).addView(titleTextView);
-            titleTextView.setX(yPosition - leftMargin - (titleTextView.getHeight()/2) + 2);
+
+            DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+            int width = metrics.widthPixels;
+            int center = width/2;
+            int position = center - this.titleTextView.getWidth()/2;
+            titleTextView.setX(position - leftMargin);
             titleTextView.setTranslationY(0);
         }
     }
