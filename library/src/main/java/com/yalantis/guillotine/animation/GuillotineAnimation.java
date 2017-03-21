@@ -9,7 +9,11 @@ import android.support.v7.widget.AppCompatTextView;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -46,6 +50,19 @@ public class GuillotineAnimation {
 
     private GuillotineAnimation(GuillotineBuilder builder) {
         this.mActionBarView = builder.actionBarView;
+        //  Add view behind action bar
+        ViewParent parent = this.mActionBarView.getParent();
+        View view = new View(this.mActionBarView.getContext());
+        view.setBackground(this.mActionBarView.getBackground());
+        ViewGroup.LayoutParams viewParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 70);
+        view.setLayoutParams(viewParams);
+        if (parent instanceof LinearLayout) {
+            ViewParent grandparentView = parent.getParent();
+            if (grandparentView instanceof FrameLayout) {
+                ((FrameLayout) grandparentView).addView(view, 0);
+            }
+        }
+
         this.mListener = builder.guillotineListener;
         this.mGuillotineView = builder.guillotineView;
         this.mDuration = builder.duration > 0 ? builder.duration : DEFAULT_DURATION;
@@ -291,8 +308,10 @@ public class GuillotineAnimation {
             titleTextView.setRotation(0);
             ((RelativeLayout) mGuillotineView).removeView(titleTextView);
 
+            android.support.v7.widget.Toolbar myToolbar = (android.support.v7.widget.Toolbar) mActionBarView;
+
             float leftMargin = 0;
-            for (int j = 0; j < ((android.support.v7.widget.Toolbar) mActionBarView).getChildCount(); j++) {
+            for (int j = 0; j < myToolbar.getChildCount(); j++) {
                 View v2 = ((android.support.v7.widget.Toolbar) mActionBarView).getChildAt(j);
                 leftMargin += v2.getWidth();
             }
@@ -300,6 +319,11 @@ public class GuillotineAnimation {
 
             DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
             int width = metrics.widthPixels;
+
+            ViewGroup.LayoutParams layoutParams = myToolbar.getLayoutParams();
+            layoutParams.width = width + 100;
+            myToolbar.setLayoutParams(layoutParams);
+
             int center = width/2;
             int position = center - this.titleTextView.getWidth()/2;
             titleTextView.setX(position - leftMargin);
