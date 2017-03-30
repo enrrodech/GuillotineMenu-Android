@@ -111,7 +111,7 @@ public class GuillotineAnimation {
                         x1 = motionEvent.getX();
                         return true;
                     case MotionEvent.ACTION_UP:
-                        if (x1 < 40) {
+                        if (x1 < 70) {
                             x2 = motionEvent.getX();
                             float deltaX = x2 - x1;
                             if (Math.abs(deltaX) > MIN_GESTURE_DISTANCE) {
@@ -192,7 +192,7 @@ public class GuillotineAnimation {
 
     private ObjectAnimator buildOpeningAnimation() {
         ObjectAnimator rotationAnimator = initAnimator(ObjectAnimator.ofFloat(mGuillotineView, ROTATION, GUILLOTINE_CLOSED_ANGLE, GUILLOTINE_OPENED_ANGLE));
-        rotationAnimator.setInterpolator(mInterpolator);
+        //rotationAnimator.setInterpolator(mInterpolator);
         rotationAnimator.setDuration(mDuration);
         rotationAnimator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -241,7 +241,7 @@ public class GuillotineAnimation {
                 mActionBarView.setAlpha(1);
                 mGuillotineView.setVisibility(View.GONE);
                 removeTitleActionBarFromGuillotineView();
-                startActionBarAnimation();
+                //startActionBarAnimation();
 
                 if (mListener != null) {
                     mListener.onGuillotineClosed();
