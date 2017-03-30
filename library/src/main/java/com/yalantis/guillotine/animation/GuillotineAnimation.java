@@ -193,7 +193,8 @@ public class GuillotineAnimation {
     private ObjectAnimator buildOpeningAnimation() {
         ObjectAnimator rotationAnimator = initAnimator(ObjectAnimator.ofFloat(mGuillotineView, ROTATION, GUILLOTINE_CLOSED_ANGLE, GUILLOTINE_OPENED_ANGLE));
         //rotationAnimator.setInterpolator(mInterpolator);
-        rotationAnimator.setDuration(mDuration);
+        //rotationAnimator.setDuration(mDuration);
+        rotationAnimator.setDuration(425);
         rotationAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -226,7 +227,8 @@ public class GuillotineAnimation {
 
     private ObjectAnimator buildClosingAnimation() {
         ObjectAnimator rotationAnimator = initAnimator(ObjectAnimator.ofFloat(mGuillotineView, ROTATION, GUILLOTINE_OPENED_ANGLE, GUILLOTINE_CLOSED_ANGLE));
-        rotationAnimator.setDuration((long) (mDuration * GuillotineInterpolator.ROTATION_TIME));
+        //rotationAnimator.setDuration((long) (mDuration * GuillotineInterpolator.ROTATION_TIME));
+        rotationAnimator.setDuration(290);
         rotationAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
