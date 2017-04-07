@@ -245,10 +245,10 @@ public class GuillotineAnimation {
                 removeTitleActionBarFromGuillotineView();
                 //startActionBarAnimation();
 
+                isClosed = true;
                 if (mListener != null) {
                     mListener.onGuillotineClosed();
                 }
-                isClosed = true;
             }
 
             @Override
