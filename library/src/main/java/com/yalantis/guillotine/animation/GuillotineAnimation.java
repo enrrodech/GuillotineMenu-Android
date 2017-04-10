@@ -127,6 +127,9 @@ public class GuillotineAnimation {
 
     public void open() {
         if (!isOpening) {
+            if (mListener != null) {
+                mListener.onGuillotineWillOpen();
+            }
             addTitleActionBarToGuillotineView();
             mOpeningAnimation.start();
         }
@@ -134,6 +137,9 @@ public class GuillotineAnimation {
 
     public void close() {
         if (!isClosing) {
+            if (mListener != null) {
+                mListener.onGuillotineWillClose();
+            }
             if (titleTextView != null) {
                 titleTextView.animate().setDuration(mDelay).alpha(1).start();
             }
