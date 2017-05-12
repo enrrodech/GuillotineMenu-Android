@@ -4,7 +4,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.content.res.Resources;
-import android.os.Build;
+import android.os.Handler;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -31,6 +31,8 @@ public class GuillotineAnimation {
     private static final int DEFAULT_DURATION = 625;
     private static final float ACTION_BAR_ROTATION_ANGLE = 3f;
     private static final int MIN_GESTURE_DISTANCE = 50;
+    private static final int DURATION_OPENING = 425;
+    private static final int DURATION_CLOSING = 290;
 
     private final View mGuillotineView;
     private final long mDuration;
@@ -42,8 +44,7 @@ public class GuillotineAnimation {
     private final View mActionBarView;
     private final long mDelay;
 
-    private boolean isOpening;
-    private boolean isClosing;
+    private boolean isMoving;
     private boolean isClosed;
 
     private TextView titleTextView;
@@ -73,6 +74,7 @@ public class GuillotineAnimation {
         setUpClosingView(builder.closingView);
         this.mOpeningAnimation = buildOpeningAnimation();
         this.mClosingAnimation = buildClosingAnimation();
+        isMoving = false;
         if (builder.isClosedOnStart) {
             isClosed = true;
             mGuillotineView.setRotation(GUILLOTINE_CLOSED_ANGLE);
@@ -126,22 +128,23 @@ public class GuillotineAnimation {
     }
 
     public void open() {
-        if (!isOpening) {
+        if (!isMoving) {
+            isMoving = true;
             if (mListener != null) {
                 mListener.onGuillotineWillOpen();
             }
-            addTitleActionBarToGuillotineView();
             mOpeningAnimation.start();
         }
     }
 
     public void close() {
-        if (!isClosing) {
+        if (!isMoving) {
+            isMoving = true;
             if (mListener != null) {
                 mListener.onGuillotineWillClose();
             }
             if (titleTextView != null) {
-                titleTextView.animate().setDuration(mDelay).alpha(1).start();
+                titleTextView.animate().setDuration(200).alpha(1).start();
             }
             mClosingAnimation.start();
         }
@@ -156,11 +159,7 @@ public class GuillotineAnimation {
             mActionBarView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        mActionBarView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    } else {
-                        mActionBarView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    }
+                    mActionBarView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     mActionBarView.setPivotX(calculatePivotX(openingView));
                     mActionBarView.setPivotY(calculatePivotY(openingView));
                 }
@@ -178,11 +177,7 @@ public class GuillotineAnimation {
         mGuillotineView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    mGuillotineView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    mGuillotineView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
+                mGuillotineView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 mGuillotineView.setPivotX(calculatePivotX(closingView));
                 mGuillotineView.setPivotY(calculatePivotY(closingView));
             }
@@ -200,22 +195,27 @@ public class GuillotineAnimation {
         ObjectAnimator rotationAnimator = initAnimator(ObjectAnimator.ofFloat(mGuillotineView, ROTATION, GUILLOTINE_CLOSED_ANGLE, GUILLOTINE_OPENED_ANGLE));
         //rotationAnimator.setInterpolator(mInterpolator);
         //rotationAnimator.setDuration(mDuration);
-        rotationAnimator.setDuration(425);
+        rotationAnimator.setDuration(DURATION_OPENING);
         rotationAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
+                addTitleActionBarToGuillotineView();
                 mGuillotineView.setVisibility(View.VISIBLE);
                 mActionBarView.setVisibility(View.INVISIBLE);
-                isOpening = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                isOpening = false;
                 if (mListener != null) {
                     mListener.onGuillotineOpened();
                 }
                 isClosed = false;
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        isMoving = false;
+                    }
+                }, 100);
             }
 
             @Override
@@ -234,17 +234,15 @@ public class GuillotineAnimation {
     private ObjectAnimator buildClosingAnimation() {
         ObjectAnimator rotationAnimator = initAnimator(ObjectAnimator.ofFloat(mGuillotineView, ROTATION, GUILLOTINE_OPENED_ANGLE, GUILLOTINE_CLOSED_ANGLE));
         //rotationAnimator.setDuration((long) (mDuration * GuillotineInterpolator.ROTATION_TIME));
-        rotationAnimator.setDuration(290);
+        rotationAnimator.setDuration(DURATION_CLOSING);
         rotationAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                isClosing = true;
                 mGuillotineView.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                isClosing = false;
                 mActionBarView.setVisibility(View.VISIBLE);
                 mActionBarView.setAlpha(1);
                 mGuillotineView.setVisibility(View.GONE);
@@ -255,6 +253,12 @@ public class GuillotineAnimation {
                 if (mListener != null) {
                     mListener.onGuillotineClosed();
                 }
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        isMoving = false;
+                    }
+                }, 100);
             }
 
             @Override
@@ -314,7 +318,6 @@ public class GuillotineAnimation {
     private void removeTitleActionBarFromGuillotineView() {
         if (titleTextView != null) {
             titleTextView.setRotation(0);
-            ((RelativeLayout) mGuillotineView).removeView(titleTextView);
 
             android.support.v7.widget.Toolbar myToolbar = (android.support.v7.widget.Toolbar) mActionBarView;
 
@@ -323,6 +326,7 @@ public class GuillotineAnimation {
                 View v2 = ((android.support.v7.widget.Toolbar) mActionBarView).getChildAt(j);
                 leftMargin += v2.getWidth();
             }
+            ((RelativeLayout) mGuillotineView).removeView(titleTextView);
             ((android.support.v7.widget.Toolbar) mActionBarView).addView(titleTextView);
 
             DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
@@ -333,7 +337,7 @@ public class GuillotineAnimation {
             myToolbar.setLayoutParams(layoutParams);
 
             int center = width/2;
-            int position = center - this.titleTextView.getWidth()/2;
+            int position = center - titleTextView.getWidth()/2;
             titleTextView.setX(position - leftMargin);
             titleTextView.setTranslationY(0);
         }
