@@ -133,6 +133,7 @@ public class GuillotineAnimation {
             if (mListener != null) {
                 mListener.onGuillotineWillOpen();
             }
+            addTitleActionBarToGuillotineView();
             mOpeningAnimation.start();
         }
     }
@@ -199,7 +200,6 @@ public class GuillotineAnimation {
         rotationAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                addTitleActionBarToGuillotineView();
                 mGuillotineView.setVisibility(View.VISIBLE);
                 mActionBarView.setVisibility(View.INVISIBLE);
             }
