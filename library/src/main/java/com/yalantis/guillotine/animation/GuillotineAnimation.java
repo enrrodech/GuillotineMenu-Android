@@ -139,7 +139,7 @@ public class GuillotineAnimation {
             if (mListener != null)
                 mListener.onGuillotineWillClose();
             if (titleTextViewOnActionBar != null)
-                titleTextViewOnActionBar.animate().setDuration(200).alpha(1).start();
+                titleTextViewOnActionBar.animate().setDuration(DURATION_CLOSING).alpha(1).start();
             mClosingAnimation.start();
         }
     }
@@ -304,7 +304,7 @@ public class GuillotineAnimation {
             }
         }
         if (titleTextViewOnActionBar != null)
-            titleTextViewOnActionBar.animate().setDuration(mDelay).alpha(0).start();
+            titleTextViewOnActionBar.animate().setDuration(DURATION_OPENING).alpha(0).start();
     }
 
     private void removeTitleActionBarFromGuillotineView() {
